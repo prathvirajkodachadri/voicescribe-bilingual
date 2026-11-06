@@ -62,11 +62,11 @@ Browsers block system audio for privacy, so we give you 2 working options:
 
 ### 🔧 Language detection and editing
 
-Type in any language panel to translate into the other two after a short pause. Source text, cursor and spacing are preserved. Use the one-tap **English / 日本語 / ಕನ್ನಡ** switch to choose the source for both speech and quick typing. Switching preserves existing drafts and stops active listening; tap the microphone again when ready. Text entered in a language panel is always interpreted as that panel’s language.
+Type in any language panel to translate into the other two after a short pause. Source text, cursor and spacing are preserved. Use the one-tap **English / 日本語 / ಕನ್ನಡ** switch to choose the speech language. Switching preserves existing drafts and stops active listening; tap the microphone again when ready. Text entered in a language panel is always interpreted as that panel’s language.
 
 Choose **English**, **日本語**, or **ಕನ್ನಡ** using the language switch before speaking. There is no automatic spoken-language detection; select the correct speech language before listening. Speech recognition support depends on your browser and speech provider. Kannada read-aloud requires an installed Kannada voice.
 
-All three languages are included in local drafts, history, Copy All, sharing, TXT and CSV exports. Older English/Japanese drafts remain compatible.
+All three languages are included in local drafts, history, Copy All, sharing and CSV exports. Older English/Japanese drafts remain compatible.
 
 ---
 
