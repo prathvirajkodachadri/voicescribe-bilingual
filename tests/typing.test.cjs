@@ -5,7 +5,7 @@ const html=require('node:fs').readFileSync('index.html','utf8');
 const script=html.slice(html.indexOf('// A shared revision'),html.indexOf('\nfunction pushHistory'));
 function setup(){
   const field=()=>({value:'',addEventListener(){}});
-  const c={enText:field(),jaText:field(),knText:field(),quickInput:field(),autoTranslate:{checked:true,addEventListener(){}},statusEl:{},enBadge:{},jaBadge:{},knBadge:{},updateCounts(){},save(){},pushHistory(){},setBilingual(){throw Error('Source must not be rewritten');},setTimeout,clearTimeout};
+  const c={AbortController,enText:field(),jaText:field(),knText:field(),quickInput:field(),autoTranslate:{checked:true,addEventListener(){}},statusEl:{},enBadge:{},jaBadge:{},knBadge:{},updateCounts(){},save(){},pushHistory(){},setBilingual(){throw Error('Source must not be rewritten');},setTimeout,clearTimeout};
   c.editors={en:c.enText,ja:c.jaText,kn:c.knText}; c.badges={en:c.enBadge,ja:c.jaBadge,kn:c.knBadge};
   vm.createContext(c); vm.runInContext(script,c); return c;
 }
@@ -60,4 +60,17 @@ test('all translated sentence segments are preserved',async()=>{
   const c=setup(); c.fetch=async()=>({ok:true,json:async()=>[[['First. '],['Second.']]]});
   await c.doTranslate('source','en',null,'auto');
   assert.equal(c.jaText.value,'First. Second.');
+});
+
+test('editing aborts both in-flight target requests',async()=>{
+  const c=setup(); const signals=[];
+  c.fetch=(url,{signal})=>new Promise((resolve,reject)=>{
+    signals.push(signal);
+    signal.addEventListener('abort',()=>reject(new Error('Aborted')));
+  });
+  const pending=c.doTranslate('source','en',null,'auto');
+  c.invalidateTranslation();
+  await pending;
+  assert.equal(signals.length,2);
+  assert.ok(signals.every(signal=>signal.aborted));
 });
