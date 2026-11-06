@@ -1,9 +1,9 @@
-# VoiceScribe Bilingual — EN ⇄ JA (GitHub Pages + Google Sites)
+# VoiceScribe Bilingual — EN ⇄ JA (GitHub Pages)
 
 **Speak in English *or* Japanese → See BOTH languages instantly.  
 Mic also listens to computer sound (Meet/Zoom/YouTube) when you enable System Audio capture.**
 
-This is a **ready-to-deploy website** for GitHub Pages. It can also be embedded inside **Google Sites**.
+This is a **ready-to-deploy standalone website** for GitHub Pages. Open its HTTPS URL directly in your browser; no Google Sites embed is needed.
 
 ---
 
@@ -28,20 +28,10 @@ This is a **ready-to-deploy website** for GitHub Pages. It can also be embedded 
 
 > That's it! Send that link to your Japanese team — no install needed. They open it in Chrome and it works.
 
-### 🔗 Embed inside Google Sites
+### 🔗 Use the website directly
 
-Google Sites doesn't allow heavy custom JS directly, but you can embed your GitHub Pages site:
-
-1. Deploy to GitHub Pages first (above)
-2. In Google Sites → **Insert → Embed → By URL**
-3. Paste your GitHub Pages URL: `https://YOURUSERNAME.github.io/voicescribe-bilingual/`
-4. Or **Insert → Embed → Embed code** and paste:
-```html
-<iframe src="https://YOURUSERNAME.github.io/voicescribe-bilingual/" width="100%" height="750" frameborder="0" allow="microphone; display-capture; clipboard-write"></iframe>
-```
-5. **Important:** In Google Sites, you must check `allow="microphone; display-capture"` — otherwise mic will be blocked.
-
-Alternative: Upload `index.html` directly via **Google Sites → Embed → Upload** (if your Workspace allows HTML embed).
+After deployment, open `https://YOURUSERNAME.github.io/voicescribe-bilingual/` directly in your browser.
+For computer-sound capture, use desktop Chrome or Edge over HTTPS and allow screen sharing when prompted. Mobile browsers may not support computer-sound capture.
 
 ---
 

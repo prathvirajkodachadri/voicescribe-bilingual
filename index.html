@@ -92,7 +92,6 @@
     </div>
   </div>
   <div class="top-actions">
-    <span class="pill">For GitHub Pages & Google Sites</span>
     <button class="btn btn-light" id="installBtn" style="display:none">⬇️ Install</button>
     <a href="#help" class="btn btn-light" style="text-decoration:none">Help</a>
   </div>
@@ -214,7 +213,7 @@
   </div>
 
   <div class="footer">
-    VoiceScribe Bilingual v2.0 • Built for EN ⇄ JA teamwork • Deploy to GitHub Pages or embed in Google Sites<br>
+    VoiceScribe Bilingual v2.0 • Built for EN ⇄ JA teamwork • Open directly on GitHub Pages<br>
     Translation via MyMemory (free) • Speech via Web Speech API (Chrome/Safari) • No data stored on server
   </div>
 </div>
@@ -402,8 +401,31 @@ micBtn.addEventListener('click', async()=>{ if(isListening) stopListening(); els
 listenMode.addEventListener('change', ()=>{ save(); if(isListening){ stopListening(); setTimeout(startListening,400); } });
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); if(isListening) stopListening(); else startListening(); } });
 
+// Screen capture is not available in every browser (notably many mobile browsers).
+// Check on click so the user gets actionable guidance rather than a TypeError.
+function getSystemCaptureUnavailableReason(){
+  if(!window.isSecureContext){
+    return 'Computer sound capture requires HTTPS. Open the HTTPS version of this site, or use localhost for development.';
+  }
+  const policy=document.permissionsPolicy||document.featurePolicy;
+  if(policy && typeof policy.allowsFeature==='function' && !policy.allowsFeature('display-capture')){
+    return 'Screen capture is blocked in this embed. Open this site directly in a new tab, or allow display-capture in the embedding page.';
+  }
+  if(typeof navigator.mediaDevices?.getDisplayMedia!=='function'){
+    return 'Computer sound capture is unavailable in this browser. Open this site directly in desktop Chrome or Edge over HTTPS. You can still use the microphone button in a supported browser.';
+  }
+  return '';
+}
+
 // System Audio Capture
 sysBtn.addEventListener('click', async()=>{
+  const unavailableReason=getSystemCaptureUnavailableReason();
+  if(unavailableReason){
+    statusEl.textContent='⚠️ '+unavailableReason;
+    statusEl.className='status';
+    showToast('Computer sound capture unavailable — see the guidance above');
+    return;
+  }
   try{
     const stream=await navigator.mediaDevices.getDisplayMedia({video:true, audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
     sysStream=stream;
@@ -440,7 +462,10 @@ sysBtn.addEventListener('click', async()=>{
     stream.getVideoTracks().forEach(t=>t.onended=stopSystem);
     audioTracks[0].onended=stopSystem;
   }catch(e){
-    if(e.name==='NotAllowedError') showToast('System capture cancelled');
+    if(e.name==='NotAllowedError'){
+      statusEl.textContent='⚠️ Screen sharing was cancelled or blocked. Allow screen sharing in your browser; if embedded, try opening this site directly in a new tab.';
+      showToast('Screen sharing cancelled or blocked');
+    }
     else { statusEl.textContent='⚠️ System capture failed: '+e.message; showToast(e.message); }
   }
 });
