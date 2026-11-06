@@ -1,13 +1,21 @@
 {
-  "name": "VoiceScribe Bilingual — EN ⇄ JA",
+  "name": "VoiceScribe — EN ⇄ JA ⇄ KN",
   "short_name": "VoiceScribe BI",
-  "description": "Speak English or Japanese → See both instantly. Mic + System Sound for Meet/Zoom",
+  "description": "English, Japanese and Kannada translation with microphone and computer-sound capture",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0ea5e9",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
