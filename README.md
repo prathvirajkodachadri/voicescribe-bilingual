@@ -62,12 +62,18 @@ Browsers block system audio for privacy, so we give you 2 working options:
 
 ### 🔧 Language detection and editing
 
-Type in any language panel to translate into the other two after a short pause. Source text, cursor and spacing are preserved. Quick input detects Kannada script (`U+0C80–U+0CFF`), Japanese kana/kanji, or defaults to English. Romanized Kannada is not automatically detected.
+Type in any language panel to translate into the other two after a short pause. Source text, cursor and spacing are preserved. Quick input detects Kannada script (`U+0C80–U+0CFF`), Japanese kana/kanji, or defaults to English. For romanized Kannada or ambiguous short text, choose the source explicitly using the Quick Type source selector. Text entered in a language panel is always interpreted as that panel’s language.
 
-Choose **English**, **Japanese**, or **Kannada** in Listening Mode before speaking. Auto mode detects returned transcript script; it does not provide automatic spoken-language detection. Speech recognition support depends on your browser and speech provider. Kannada read-aloud requires an installed Kannada voice.
+Choose **English**, **Japanese**, or **Kannada** in Listening Mode before speaking. There is no automatic spoken-language detection; select the correct speech language before listening. Speech recognition support depends on your browser and speech provider. Kannada read-aloud requires an installed Kannada voice.
 
 All three languages are included in local drafts, history, Copy All, sharing, TXT and CSV exports. Older English/Japanese drafts remain compatible.
 
 ---
 
 Made for cross-language teamwork — Hyderabad ⇄ Japan
+
+### Translation service and accuracy
+
+Translations now go directly from the selected source to each target using the existing Google web translation endpoint. Translation-memory results are no longer silently substituted. Malformed or failed responses are marked as failures, and old target text is cleared rather than shown as a new translation.
+
+This is an unofficial browser endpoint, not a supported production API, and may be blocked or rate-limited. Machine translation can still be inaccurate, particularly for romanized input, names, and short phrases. Production-grade availability requires a supported translation API behind a backend; never put provider secrets in this static site. Automated tests use mocked responses and check routing and state handling, not linguistic accuracy.
