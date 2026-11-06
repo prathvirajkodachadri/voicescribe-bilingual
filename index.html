@@ -271,6 +271,29 @@ function save(){
   try{ const s=JSON.parse(localStorage.getItem('vs_bilingual')||'{}'); if(s.en) enText.value=s.en; if(s.ja) jaText.value=s.ja; if(s.mode) listenMode.value=s.mode; if(s.hist) historyLog=s.hist; renderHistory(); updateCounts(); }catch(e){}
 })();
 
+// Stop before an edit (including paste/IME), with input as a fallback.
+function stopListeningForTyping(){
+  const wasListening=isListening;
+  isListening=false; // Prevent continuous mode from restarting recognition.
+  if(wasListening && recognition){
+    // abort discards pending speech results instead of inserting them into an edit.
+    try{ recognition.abort(); }catch(e){}
+  }
+  if(sysStream) stopSystem();
+  if(wasListening){
+    micBtn.classList.remove('listening');
+    micBtn.querySelector('.mic-icon').textContent='🎤';
+    micBtn.querySelector('.mic-label').textContent='Tap to Listen';
+    visualizer.classList.remove('active');
+    statusEl.textContent='Listening stopped — tap the mic to resume';
+    statusEl.className='status';
+  }
+}
+[enText, jaText, quickInput].forEach(field=>{
+  field.addEventListener('beforeinput', stopListeningForTyping);
+  field.addEventListener('input', stopListeningForTyping);
+});
+
 enText.addEventListener('input',()=>{ updateCounts(); save(); if(autoTranslate.checked && enText.value.trim()){ const t=enText.value.trim(); if(!isJapanese(t)) doTranslate(t,'en','ja','auto'); }});
 jaText.addEventListener('input',()=>{ updateCounts(); save(); if(autoTranslate.checked && jaText.value.trim()){ const t=jaText.value.trim(); if(isJapanese(t)) doTranslate(t,'ja','en','auto'); }});
 quickInput.addEventListener('keydown',e=>{
@@ -341,6 +364,7 @@ if(!SR){
     isListening=false; micBtn.classList.remove('listening'); visualizer.classList.remove('active');
   };
   recognition.onresult=e=>{
+    if(!isListening) return; // Ignore speech arriving after the user starts editing.
     let interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
       const t=e.results[i][0].transcript;
