@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VoiceScribe Bilingual — English ⇄ Japanese</title>
 <meta name="description" content="Speak English or Japanese → See both instantly. For Teams working with Japan. Captures mic + computer sound.">
 <meta name="theme-color" content="#0f172a">
@@ -79,6 +79,25 @@
   @keyframes wave{0%,100%{transform:scaleY(.6)}50%{transform:scaleY(1.2)}}
   .footer{text-align:center;padding:18px;font-size:11px;color:#94a3b8}
   .kbd{font-family:monospace;background:#f1f5f9;border:1px solid #e2e8f0;border-bottom-width:2px;padding:2px 6px;border-radius:6px;font-size:11px}
+
+  /* Quiet, spacious editing workspace with accessible keyboard focus. */
+  body{background:radial-gradient(ellipse at 12% 0%,#e8edff 0,transparent 45%),#f5f6fa}
+  .topbar{background:#131d35;padding:18px max(24px,calc((100vw - 1140px)/2));box-shadow:0 3px 18px #101b3020}
+  .brand h1{font-size:19px;line-height:1.4}.brand p{letter-spacing:1px;font-size:10px}
+  .container{max-width:1160px;padding:28px 24px;gap:20px}
+  .notice{background:#eef2ff;border-color:#dce2fa;color:#394569}
+  .panel{border:1px solid #dce1ed!important;border-radius:20px;box-shadow:0 8px 28px #18284c06;transition:box-shadow .2s,border-color .2s}
+  .panel:focus-within{border-color:#818cf8!important;box-shadow:0 0 0 3px #6366f112,0 12px 35px #18284c0a}
+  .panel-head{padding:16px 18px;background:#fff}.panel-head h3{font-size:12px}
+  .panel textarea{min-height:260px;padding:22px;font-size:17px;line-height:1.85;caret-color:#4f46e5}
+  .panel-foot{padding:12px 18px;background:#fafbfe;font-size:10px}
+  .input:focus,.select:focus{border-color:#818cf8;box-shadow:0 0 0 3px #6366f115;background:white}
+  button:focus-visible,a:focus-visible{outline:3px solid #818cf8;outline-offset:4px}
+  .btn,.icon-btn,.small-btn{min-height:36px}.btn:hover,.icon-btn:hover,.small-btn:hover{filter:brightness(.96)}
+  .mic-area{box-shadow:0 8px 30px #18284c06;border-radius:20px;padding:24px}
+  .status{font-size:13px;font-weight:500;min-height:22px}
+  @media(max-width:600px){.container{padding:16px 12px}.topbar{padding:14px 16px}.panel textarea{font-size:16px;min-height:220px}.input,.select{font-size:16px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -162,8 +181,8 @@
           <button class="small-btn" id="speakEnBtn">🔊 Listen</button>
         </div>
       </div>
-      <textarea id="enText" placeholder="English will appear here...&#10;Speak: Hello, how are you?"></textarea>
-      <div class="panel-foot"><span id="enCount">0 chars</span><span><span class="kbd">EN</span> Auto-filled from speech or translation</span></div>
+      <textarea aria-label="English editor" lang="en" id="enText" placeholder="English will appear here...&#10;Speak: Hello, how are you?"></textarea>
+      <div class="panel-foot"><span id="enCount">0 chars</span><span><span class="kbd">EN</span> Type freely · Translates after a pause</span></div>
     </div>
 
     <!-- Japanese Panel -->
@@ -175,8 +194,8 @@
           <button class="small-btn" id="speakJaBtn">🔊 聞く</button>
         </div>
       </div>
-      <textarea id="jaText" placeholder="日本語はここに表示されます...&#10;例：こんにちは、お元気ですか？"></textarea>
-      <div class="panel-foot"><span id="jaCount">0 chars</span><span><span class="kbd">JA</span> 自動翻訳</span></div>
+      <textarea aria-label="Japanese editor" lang="ja" id="jaText" placeholder="日本語はここに表示されます...&#10;例：こんにちは、お元気ですか？"></textarea>
+      <div class="panel-foot"><span id="jaCount">0 chars</span><span><span class="kbd">JA</span> 入力できます · 自動翻訳</span></div>
     </div>
   </div>
 
@@ -294,41 +313,88 @@ function stopListeningForTyping(){
   field.addEventListener('input', stopListeningForTyping);
 });
 
-enText.addEventListener('input',()=>{ updateCounts(); save(); if(autoTranslate.checked && enText.value.trim()){ const t=enText.value.trim(); if(!isJapanese(t)) doTranslate(t,'en','ja','auto'); }});
-jaText.addEventListener('input',()=>{ updateCounts(); save(); if(autoTranslate.checked && jaText.value.trim()){ const t=jaText.value.trim(); if(isJapanese(t)) doTranslate(t,'ja','en','auto'); }});
-quickInput.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    const v=e.target.value.trim(); if(!v) return;
-    const lang=isJapanese(v)?'ja':'en';
-    handleFinalTranscript(v, lang);
-    e.target.value='';
+// A shared revision prevents any older speech/translation response from replacing edits.
+let translationRevision=0, typingTimer=null, composing=false;
+function invalidateTranslation(){
+  translationRevision++;
+  clearTimeout(typingTimer);
+}
+function queueTypedTranslation(field, src){
+  invalidateTranslation();
+  updateCounts(); save();
+  if(composing) return;
+  const text=field.value.trim();
+  if(!autoTranslate.checked || !text){
+    statusEl.textContent='Draft saved locally';
+    return;
   }
+  statusEl.textContent='Editing — translation starts when you pause';
+  typingTimer=setTimeout(()=>doTranslate(text,src,src==='en'?'ja':'en','auto'),650);
+}
+[enText, jaText, quickInput].forEach(field=>{
+  field.addEventListener('beforeinput', invalidateTranslation);
+  field.addEventListener('compositionstart',()=>{ composing=true; invalidateTranslation(); });
+  field.addEventListener('compositionend',()=>{
+    composing=false;
+    if(field!==quickInput) queueTypedTranslation(field,field===enText?'en':'ja');
+  });
+});
+enText.addEventListener('input',()=>queueTypedTranslation(enText,'en'));
+jaText.addEventListener('input',()=>queueTypedTranslation(jaText,'ja'));
+quickInput.addEventListener('input',invalidateTranslation);
+autoTranslate.addEventListener('change',invalidateTranslation);
+quickInput.addEventListener('keydown',e=>{
+  if(e.key!=='Enter' || e.isComposing || composing || e.keyCode===229) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const v=e.target.value.trim(); if(!v) return;
+  invalidateTranslation();
+  handleFinalTranscript(v,isJapanese(v)?'ja':'en');
+  e.target.value='';
 });
 
-// Translation
+// Translation: only the latest request may update the document.
 async function doTranslate(text, src, tgt, trigger){
-  // src: en/ja, tgt: en/ja
-  const mapSrc={en:'en',ja:'ja'}; const mapTgt={en:'en',ja:'ja'};
-  const srcCode=mapSrc[src]||src, tgtCode=mapTgt[tgt]||tgt;
   if(!text) return;
+  const revision=++translationRevision;
+  const current=()=>revision===translationRevision;
+  statusEl.textContent='Translating…'; statusEl.className='status';
   try{
-    statusEl.textContent='🌐 Translating...'; statusEl.className='status';
-    const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcCode}|${tgtCode}`;
-    const r=await fetch(url); const j=await r.json();
-    let out=j?.responseData?.translatedText;
-    if(!out) throw new Error('no trans');
-    // MyMemory sometimes returns escaped
-    if(src==='ja' && tgt==='en') setBilingual(out, text, 'ja');
-    else setBilingual(text, out, 'en');
-    pushHistory(text, out, src);
-  }catch(e){
-    // fallback Google
+    let out;
     try{
-      const url2=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${tgt}&dt=t&q=${encodeURIComponent(text)}`;
-      const r2=await fetch(url2); const j2=await r2.json();
-      if(j2?.[0]){ const out2=j2[0].map(s=>s[0]).join(''); if(src==='ja') setBilingual(out2,text,'ja'); else setBilingual(text,out2,'en'); pushHistory(text,out2,src); }
-    }catch(e2){ statusEl.textContent='⚠️ Translation failed'; showToast('Translation failed'); }
-  } finally { if(isListening) { statusEl.textContent='🎧 Listening... speak English or Japanese'; statusEl.className='status listening'; } else { statusEl.textContent='Ready — tap to start'; statusEl.className='status'; } }
+      const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${tgt}`);
+      if(!current()) return;
+      if(!r.ok) throw new Error('Translation service unavailable');
+      const j=await r.json();
+      if(j.responseStatus && Number(j.responseStatus)!==200) throw new Error('Translation rejected');
+      out=j?.responseData?.translatedText;
+      if(!out) throw new Error('Empty translation');
+    }catch(error){
+      if(!current()) return;
+      const r=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${tgt}&dt=t&q=${encodeURIComponent(text)}`);
+      if(!current()) return;
+      if(!r.ok) throw new Error('Translation service unavailable');
+      const j=await r.json();
+      out=j?.[0]?.map(segment=>segment[0]).join('');
+      if(!out) throw new Error('Empty translation');
+    }
+    if(!current()) return;
+    if(trigger==='auto'){
+      // Never assign to the source textarea: preserve cursor, selection and undo.
+      const target=src==='en'?jaText:enText;
+      target.value=out;
+      const sourceBadge=src==='en'?enBadge:jaBadge;
+      const targetBadge=src==='en'?jaBadge:enBadge;
+      sourceBadge.textContent='EDITED'; sourceBadge.className='badge heard';
+      targetBadge.textContent='TRANSLATED'; targetBadge.className='badge translated';
+      updateCounts(); save();
+    }else if(src==='ja') setBilingual(out,text,'ja');
+    else setBilingual(text,out,'en');
+    pushHistory(text,out,src);
+    statusEl.textContent='Translation complete • Draft saved';
+  }catch(error){
+    if(current()) statusEl.textContent='Translation unavailable — your draft is safe. Edit again to retry.';
+  }
 }
 
 function pushHistory(original, translated, src){
@@ -414,7 +480,8 @@ async function ensureMic(){
 }
 async function startListening(){
   if(!recognition) return;
-  const ok=await ensureMic(); if(!ok) return;
+  const revision=translationRevision;
+  const ok=await ensureMic(); if(!ok || revision!==translationRevision) return;
   recognition.lang = listenMode.value==='auto' ? 'ja-JP' : listenMode.value;
   recognition.continuous=continuousMode.checked;
   recognition.interimResults=interimResultsEl.checked;
@@ -507,7 +574,7 @@ document.getElementById('stopSysBtn').addEventListener('click', stopSystem);
 document.getElementById('copyEnBtn').addEventListener('click', async()=>{ if(!enText.value) return showToast('Nothing'); await navigator.clipboard.writeText(enText.value); showToast('🇺🇸 English copied');});
 document.getElementById('copyJaBtn').addEventListener('click', async()=>{ if(!jaText.value) return showToast('Nothing'); await navigator.clipboard.writeText(jaText.value); showToast('🇯🇵 Japanese copied');});
 document.getElementById('copyBothBtn').addEventListener('click', async()=>{ const t=`🇺🇸 English:\n${enText.value}\n\n🇯🇵 Japanese:\n${jaText.value}`; await navigator.clipboard.writeText(t); showToast('Both copied');});
-document.getElementById('clearBtn').addEventListener('click', ()=>{ enText.value=''; jaText.value=''; enBadge.textContent='—'; jaBadge.textContent='—'; updateCounts(); save(); showToast('Cleared');});
+document.getElementById('clearBtn').addEventListener('click', ()=>{ invalidateTranslation(); enText.value=''; jaText.value=''; enBadge.textContent='—'; jaBadge.textContent='—'; updateCounts(); save(); showToast('Cleared');});
 document.getElementById('shareBtn').addEventListener('click', async()=>{ const t=`🇺🇸 ${enText.value}\n\n🇯🇵 ${jaText.value}`; if(navigator.share) try{await navigator.share({title:'VoiceScribe',text:t});}catch(e){} else {await navigator.clipboard.writeText(t); showToast('Copied for sharing');}});
 document.getElementById('downloadBtn').addEventListener('click', ()=>{ const c=`VoiceScribe Bilingual - ${new Date().toLocaleString()}\n\nENGLISH:\n${enText.value}\n\nJAPANESE:\n${jaText.value}\n\nHistory:\n${historyLog.map(h=>h.time+' | EN:'+h.en+' | JA:'+h.ja).join('\n')}`; const b=new Blob([c],{type:'text/plain'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=`bilingual-${Date.now()}.txt`; a.click(); URL.revokeObjectURL(u); showToast('Saved');});
 document.getElementById('speakEnBtn').addEventListener('click',()=>{ if(!enText.value) return; const u=new SpeechSynthesisUtterance(enText.value); u.lang='en-US'; speechSynthesis.cancel(); speechSynthesis.speak(u);});
