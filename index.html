@@ -100,6 +100,12 @@
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 .dual{grid-template-columns:repeat(3,minmax(0,1fr))}.history-item{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:1000px){.dual{grid-template-columns:1fr}.history-item{grid-template-columns:1fr}}
+
+.workspace-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:6px 0 2px}.eyebrow{font-size:10px;letter-spacing:2px;color:#6366f1;font-weight:800}.workspace-heading h2{font-size:clamp(20px,3vw,29px);letter-spacing:-.8px;font-weight:700;margin-top:5px}.workspace-note{font-size:12px;color:var(--muted)}
+.language-switch{display:flex;gap:5px;background:#f1f3f9;padding:5px;border:1px solid #e4e7f0;border-radius:14px;flex-wrap:wrap}
+.language-switch button{flex:1;min-height:46px;white-space:nowrap;border:1px solid transparent;border-radius:10px;background:transparent;color:#64748b;cursor:pointer;font:600 13px inherit;padding:10px;transition:background .15s,color .15s}.language-switch button span{font-size:9px;font-weight:800;margin-right:5px;opacity:.65}.language-switch button[aria-pressed="true"]{background:white;color:#4338ca;border-color:#e0e4fa;box-shadow:0 2px 7px #18284c0a}.language-switch button:hover{color:#4338ca}
+.controls{padding:20px;align-items:start;gap:24px}.panel.en:focus-within,.panel.ja:focus-within,.panel.kn:focus-within{border-color:#818cf8!important}
+@media(max-width:600px){.workspace-note{display:none}.controls{padding:16px;gap:16px}.language-switch button{padding:8px 6px}}
 </style>
 </head>
 <body>
@@ -114,32 +120,29 @@
   </div>
   <div class="top-actions">
     <button class="btn btn-light" id="installBtn" style="display:none">⬇️ Install</button>
-    <a href="#help" class="btn btn-light" style="text-decoration:none">Help</a>
   </div>
 </header>
 
 <div class="container">
 
-  <div class="notice">
-    <span style="font-size:18px">💡</span>
-    <div><b>How it works:</b> Click the big mic → speak <b>English, Japanese OR Kannada</b> → you’ll see <b>ALL THREE</b> languages instantly. For Zoom/Meet/YouTube, click <b>“Capture Computer Sound”</b> and choose <b>Share system audio</b> → it hears your colleague too.</div>
-  </div>
-
+  <section class="workspace-heading">
+    <div><span class="eyebrow">YOUR LANGUAGE WORKSPACE</span><h2>Three languages. One conversation.</h2></div>
+    <span class="workspace-note">Type, speak, connect.</span>
+  </section>
   <div class="controls">
     <div class="control-group">
-      <label>Listening Mode</label>
-      <select id="listenMode" class="select">
-        <option value="en-US">🇺🇸 English only (higher accuracy)</option>
-        <option value="kn-IN">🇮🇳 Kannada — ಕನ್ನಡ</option>
-        <option value="ja-JP">🇯🇵 Japanese only (日本語のみ)</option>
-      </select><span class="hint">Select the language you will speak. Speech recognition cannot automatically switch between these three languages.</span>
+      <label>Speak &amp; quick type in</label>
+      <div class="language-switch" role="group" aria-label="Source language">
+        <button type="button" data-language="en" aria-pressed="true"><span>EN</span> English</button>
+        <button type="button" data-language="ja" aria-pressed="false"><span>JA</span> 日本語</button>
+        <button type="button" data-language="kn" aria-pressed="false"><span>KN</span> ಕನ್ನಡ</button>
+      </div>
+      <select id="listenMode" hidden aria-label="Speech language"><option value="en-US">English</option><option value="ja-JP">Japanese</option><option value="kn-IN">Kannada</option></select>
+      <span class="hint" id="languageSummary">English selected · edit any panel to translate from that language</span>
     </div>
     <div class="control-group">
-      <label for="quickSource">Quick Type source language</label>
-      <select id="quickSource" class="select" aria-label="Quick input source language">
-        <option value="auto">Detect script (not romanized text)</option>
-        <option value="en">English</option><option value="ja">Japanese</option><option value="kn">Kannada</option>
-      </select>
+      <label for="quickInput">Quick translate <span class="kbd">Enter ↵</span></label>
+      <select id="quickSource" hidden aria-label="Quick input source language"><option value="en">English</option><option value="ja">Japanese</option><option value="kn">Kannada</option></select>
       <input id="quickInput" class="input" placeholder="Type in English, Japanese or Kannada and press Enter… 例：Hello → こんにちは">
     </div>
   </div>
@@ -148,7 +151,6 @@
     <label class="toggle"><input type="checkbox" id="autoTranslate" checked><span class="slider"></span> Auto-Translate</label>
     <label class="toggle"><input type="checkbox" id="continuousMode" checked><span class="slider"></span> Continuous</label>
     <label class="toggle"><input type="checkbox" id="interimResults" checked><span class="slider"></span> Live Preview</label>
-    <label class="toggle"><input type="checkbox" id="showBoth" checked><span class="slider"></span> Show Both Panels</label>
   </div>
 
   <div class="mic-area">
@@ -162,9 +164,9 @@
         <span class="mic-label">System Sound</span>
       </button>
     </div>
-    <div id="status" class="status">Ready — tap to start</div>
+    <div id="status" class="status" role="status" aria-live="polite">Ready — tap to start</div>
     <div class="visualizer" id="visualizer"><span></span><span></span><span></span><span></span><span></span></div>
-    <div class="hint">Allow microphone when asked • Works best in <b>Chrome (laptop)</b> & <b>Chrome/Safari (phone)</b> • For computer sound, click the teal button and <b>check “Share system audio”</b></div>
+    <div class="hint" hidden>Allow microphone when asked • Works best in <b>Chrome (laptop)</b> & <b>Chrome/Safari (phone)</b> • For computer sound, click the teal button and <b>check “Share system audio”</b></div>
 
     <div id="sysCard" class="sys-card">
       <b>🎧 System Audio Active</b> — Now hearing your computer. Sharing: <span id="sysName">-</span>
@@ -235,23 +237,7 @@
     <div id="historyList" class="history-list" style="padding:12px;color:var(--muted);font-size:12px">No history yet — your bilingual conversations will appear here.</div>
   </div>
 
-  <div id="help" style="background:white;border:1px solid var(--border);border-radius:16px;padding:16px">
-    <h3 style="font-size:13px;font-weight:800;margin-bottom:8px">🎧 How to hear computer sound (Meet / Zoom / YouTube)</h3>
-    <ol style="margin-left:18px;font-size:12px;line-height:1.7;color:#334155">
-      <li>Click <b>System Sound</b> (teal button) → Chrome asks “Choose what to share”</li>
-      <li>Select the <b>Tab</b> where your colleague is speaking (e.g., <b>Google Meet</b>) — best is <b>Chrome Tab</b></li>
-      <li><b>✅ IMPORTANT: Turn ON “Share system audio”</b> toggle at bottom-left of the share dialog (otherwise we can’t hear)</li>
-      <li>Click <b>Share</b> → you’ll see green waveform moving when sound plays</li>
-      <li>Now speak OR let your colleague speak — translations appear in English, Japanese and Kannada</li>
-      <li>To stop, click <b>⏹️ Stop System Audio</b></li>
-    </ol>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px">If no waveform: re-click and ensure “Share system audio” is checked. On Mac, you may need to use <b>Chrome → Share Window + BlackHole</b> virtual device. Extension version can capture tab audio directly without this step.</p>
-  </div>
 
-  <div class="footer">
-    VoiceScribe Bilingual v2.0 • Built for EN ⇄ JA ⇄ KN teamwork • Open directly on GitHub Pages<br>
-    Translation via MyMemory (free) • Speech via Web Speech API (Chrome/Safari) • No data stored on server
-  </div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -332,8 +318,9 @@ function stopListeningForTyping(){
 });
 
 // A shared revision prevents any older speech/translation response from replacing edits.
-let translationRevision=0, typingTimer=null, composing=false;
+let translationRevision=0, typingTimer=null, composing=false, translationController=null;
 function invalidateTranslation(){
+  if(translationController) translationController.abort();
   translationRevision++;
   clearTimeout(typingTimer);
 }
@@ -376,13 +363,17 @@ quickInput.addEventListener('keydown',e=>{
 // Translation: only the latest request may update the document.
 async function doTranslate(text, src, tgt, trigger){
   if(!text) return;
+  if(translationController) translationController.abort();
+  const controller=new AbortController();
+  translationController=controller;
+  const timeout=setTimeout(()=>controller.abort(),15000);
   const revision=++translationRevision;
   const current=()=>revision===translationRevision;
   statusEl.textContent='Translating into the other two languages…'; statusEl.className='status';
   async function translate(target){
     // Translate directly from the chosen source, never through an intermediate language.
     // Do not silently substitute unrelated translation-memory matches on failure.
-    const r=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${target}&dt=t&q=${encodeURIComponent(text)}`);
+    const r=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${target}&dt=t&q=${encodeURIComponent(text)}`,{signal:controller.signal});
     if(!r.ok) throw new Error('Translation service unavailable');
     const j=await r.json();
     if(!Array.isArray(j?.[0]) || !j[0].length) throw new Error('Invalid translation response');
@@ -395,6 +386,8 @@ async function doTranslate(text, src, tgt, trigger){
   const targets=Object.keys(editors).filter(code=>code!==src);
   targets.forEach(target=>{ badges[target].textContent='TRANSLATING…'; badges[target].className='badge'; });
   const results=await Promise.allSettled(targets.map(translate));
+  clearTimeout(timeout);
+  if(translationController===controller) translationController=null;
   if(!current()) return;
   if(trigger!=='auto') editors[src].value=text;
   badges[src].textContent=trigger==='auto'?'EDITED':'SOURCE'; badges[src].className='badge heard';
@@ -502,7 +495,7 @@ async function startListening(){
 }
 function stopListening(){ if(!recognition) return; isListening=false; try{recognition.stop();}catch(e){} }
 micBtn.addEventListener('click', async()=>{ if(isListening) stopListening(); else await startListening(); });
-listenMode.addEventListener('change', ()=>{ save(); if(isListening){ stopListening(); setTimeout(startListening,400); } });
+
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); if(isListening) stopListening(); else startListening(); } });
 
 // Screen capture is not available in every browser (notably many mobile browsers).
@@ -592,6 +585,26 @@ document.getElementById('speakKnBtn').addEventListener('click',()=>{
   if(!speechSynthesis.getVoices().some(voice=>voice.lang.startsWith('kn'))) return showToast('Install a Kannada speech voice on your device to listen');
   const speech=new SpeechSynthesisUtterance(knText.value); speech.lang='kn-IN'; speechSynthesis.cancel(); speechSynthesis.speak(speech);
 });
+
+// One source selection for speech and quick input; panel contents are never swapped.
+function selectLanguage(code, userInitiated=true){
+  if(!languages[code]) return;
+  if(userInitiated){ invalidateTranslation(); stopListeningForTyping(); }
+  listenMode.value=languages[code].locale;
+  document.getElementById('quickSource').value=code;
+  document.querySelectorAll('[data-language]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.language===code));
+  });
+  document.getElementById('languageSummary').textContent=languages[code].name+' selected · edit any panel to translate from that language';
+  quickInput.placeholder={en:'Type in English and press Enter…',ja:'日本語を入力して Enter…',kn:'ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ, Enter ಒತ್ತಿರಿ…'}[code];
+  quickInput.lang=code;
+  if(userInitiated){
+    statusEl.textContent=languages[code].name+' selected — ready to type or listen';
+    save();
+  }
+}
+document.querySelectorAll('[data-language]').forEach(button=>button.addEventListener('click',()=>selectLanguage(button.dataset.language)));
+selectLanguage(listenMode.value.split('-')[0],false);
 
 // Utilities
 document.getElementById('copyEnBtn').addEventListener('click', async()=>{ if(!enText.value) return showToast('Nothing'); await navigator.clipboard.writeText(enText.value); showToast('🇺🇸 English copied');});
