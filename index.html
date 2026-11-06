@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VoiceScribe Bilingual — English ⇄ Japanese</title>
-<meta name="description" content="Speak English or Japanese → See both instantly. For Teams working with Japan. Captures mic + computer sound.">
+<title>VoiceScribe Bilingual — English ⇄ Japanese ⇄ Kannada</title>
+<meta name="description" content="Type or speak English, Japanese or Kannada → See all three. For Teams working with Japan. Captures mic + computer sound.">
 <meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -98,6 +98,8 @@
   .status{font-size:13px;font-weight:500;min-height:22px}
   @media(max-width:600px){.container{padding:16px 12px}.topbar{padding:14px 16px}.panel textarea{font-size:16px;min-height:220px}.input,.select{font-size:16px}}
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.dual{grid-template-columns:repeat(3,minmax(0,1fr))}.history-item{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:1000px){.dual{grid-template-columns:1fr}.history-item{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -107,7 +109,7 @@
     <div class="brand-icon">🌏</div>
     <div>
       <h1>VoiceScribe Bilingual</h1>
-      <p>English ⇄ Japanese • Mic + System Sound</p>
+      <p>English ⇄ Japanese ⇄ Kannada • Mic + System Sound</p>
     </div>
   </div>
   <div class="top-actions">
@@ -120,22 +122,23 @@
 
   <div class="notice">
     <span style="font-size:18px">💡</span>
-    <div><b>How it works:</b> Click the big mic → speak <b>English OR Japanese</b> → you’ll see <b>BOTH</b> languages instantly. For Zoom/Meet/YouTube, click <b>“Capture Computer Sound”</b> and choose <b>Share system audio</b> → it hears your colleague too.</div>
+    <div><b>How it works:</b> Click the big mic → speak <b>English, Japanese OR Kannada</b> → you’ll see <b>ALL THREE</b> languages instantly. For Zoom/Meet/YouTube, click <b>“Capture Computer Sound”</b> and choose <b>Share system audio</b> → it hears your colleague too.</div>
   </div>
 
   <div class="controls">
     <div class="control-group">
       <label>Listening Mode</label>
       <select id="listenMode" class="select">
-        <option value="auto">🤖 Auto — English + Japanese (recommended)</option>
+        <option value="auto">🤖 Detect transcript — EN / JA / KN</option>
         <option value="en-US">🇺🇸 English only (higher accuracy)</option>
+        <option value="kn-IN">🇮🇳 Kannada — ಕನ್ನಡ</option>
         <option value="ja-JP">🇯🇵 Japanese only (日本語のみ)</option>
-      </select>
+      </select><span class="hint">For speech, choose the language you will speak. Auto detects transcript script, not spoken language; browser speech support varies.</span>
       <div style="font-size:11px;color:var(--muted);margin-top:4px">Auto uses Japanese engine — it hears English well. For pure English meetings, pick English only.</div>
     </div>
     <div class="control-group">
       <label>Quick Type (also auto-translates)</label>
-      <input id="quickInput" class="input" placeholder="Type Here in English or Japanese and press Enter… 例：Hello → こんにちは">
+      <input id="quickInput" class="input" placeholder="Type in English, Japanese or Kannada and press Enter… 例：Hello → こんにちは">
     </div>
   </div>
 
@@ -197,11 +200,23 @@
       <textarea aria-label="Japanese editor" lang="ja" id="jaText" placeholder="日本語はここに表示されます...&#10;例：こんにちは、お元気ですか？"></textarea>
       <div class="panel-foot"><span id="jaCount">0 chars</span><span><span class="kbd">JA</span> 入力できます · 自動翻訳</span></div>
     </div>
+    <div class="panel kn" id="knPanel">
+      <div class="panel-head">
+        <h3>🇮🇳 Kannada ಕನ್ನಡ <span id="knBadge" class="badge">—</span></h3>
+        <div class="panel-actions">
+          <button class="icon-btn" id="copyKnBtn">📋 Copy</button>
+          <button class="small-btn" id="speakKnBtn">🔊 ಕೇಳಿ</button>
+        </div>
+      </div>
+      <textarea aria-label="Kannada editor" lang="kn" id="knText" placeholder="ಇಲ್ಲಿ ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ…&#10;ಉದಾಹರಣೆ: ನಮಸ್ಕಾರ, ಹೇಗಿದ್ದೀರಿ?"></textarea>
+      <div class="panel-foot"><span id="knCount">0 chars</span><span>Type freely · Translates after a pause</span></div>
+    </div>
+
   </div>
 
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-dark" id="clearBtn">🗑️ Clear All</button>
-    <button class="btn btn-light" id="copyBothBtn" style="border:1px solid var(--border)">📋 Copy Both (EN + JA)</button>
+    <button class="btn btn-light" id="copyBothBtn" style="border:1px solid var(--border)">📋 Copy All (EN + JA + KN)</button>
     <button class="btn btn-light" id="shareBtn" style="border:1px solid var(--border)">📤 Share</button>
     <button class="btn btn-accent" id="downloadBtn">⬇️ Save TXT</button>
     <span style="font-size:11px;color:var(--muted);display:flex;align-items:center">Press <span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> to toggle mic</span>
@@ -225,14 +240,14 @@
       <li>Select the <b>Tab</b> where your colleague is speaking (e.g., <b>Google Meet</b>) — best is <b>Chrome Tab</b></li>
       <li><b>✅ IMPORTANT: Turn ON “Share system audio”</b> toggle at bottom-left of the share dialog (otherwise we can’t hear)</li>
       <li>Click <b>Share</b> → you’ll see green waveform moving when sound plays</li>
-      <li>Now speak OR let your colleague speak — both appear as EN + JA instantly</li>
+      <li>Now speak OR let your colleague speak — translations appear in English, Japanese and Kannada</li>
       <li>To stop, click <b>⏹️ Stop System Audio</b></li>
     </ol>
     <p style="font-size:11px;color:var(--muted);margin-top:8px">If no waveform: re-click and ensure “Share system audio” is checked. On Mac, you may need to use <b>Chrome → Share Window + BlackHole</b> virtual device. Extension version can capture tab audio directly without this step.</p>
   </div>
 
   <div class="footer">
-    VoiceScribe Bilingual v2.0 • Built for EN ⇄ JA teamwork • Open directly on GitHub Pages<br>
+    VoiceScribe Bilingual v2.0 • Built for EN ⇄ JA ⇄ KN teamwork • Open directly on GitHub Pages<br>
     Translation via MyMemory (free) • Speech via Web Speech API (Chrome/Safari) • No data stored on server
   </div>
 </div>
@@ -256,6 +271,9 @@ const sysCard=document.getElementById('sysCard');
 const sysMeter=document.getElementById('sysMeter');
 const sysName=document.getElementById('sysName');
 const enText=document.getElementById('enText');
+const knText=document.getElementById('knText');
+const knBadge=document.getElementById('knBadge');
+const knCount=document.getElementById('knCount');
 const jaText=document.getElementById('jaText');
 const enBadge=document.getElementById('enBadge');
 const jaBadge=document.getElementById('jaBadge');
@@ -269,25 +287,23 @@ const autoTranslate=document.getElementById('autoTranslate');
 const continuousMode=document.getElementById('continuousMode');
 const interimResultsEl=document.getElementById('interimResults');
 
+const editors={en:enText,ja:jaText,kn:knText};
+const badges={en:enBadge,ja:jaBadge,kn:knBadge};
+const languages={en:{name:'English',locale:'en-US'},ja:{name:'Japanese 日本語',locale:'ja-JP'},kn:{name:'Kannada ಕನ್ನಡ',locale:'kn-IN'}};
+function detectLanguage(text){ return /[\u0C80-\u0CFF]/.test(text)?'kn':isJapanese(text)?'ja':'en'; }
+function allText(){ return Object.keys(editors).map(code=>languages[code].name+':\n'+editors[code].value).join('\n\n'); }
+
 let recognition=null, isListening=false, sysStream=null, audioCtx=null, analyser=null, meterRAF=null;
 let historyLog=[];
 
 function isJapanese(str){ return /[\u3040-\u30FF\u4E00-\u9FFF]/.test(str); }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
-function updateCounts(){ enCount.textContent=enText.value.length+' chars'; jaCount.textContent=jaText.value.length+' chars'; }
-function setBilingual(en, ja, sourceLang){
-  enText.value=en||''; jaText.value=ja||'';
-  if(sourceLang==='ja'){ enBadge.textContent='TRANSLATED'; jaBadge.textContent='HEARD 🎧'; enBadge.className='badge translated'; jaBadge.className='badge heard'; jaPanel.classList.add('active'); enPanel.classList.remove('active'); }
-  else if(sourceLang==='en'){ jaBadge.textContent='TRANSLATED'; enBadge.textContent='HEARD 🎧'; jaBadge.className='badge translated'; enBadge.className='badge heard'; enPanel.classList.add('active'); jaPanel.classList.remove('active'); }
-  else { enBadge.textContent='—'; jaBadge.textContent='—'; enBadge.className='badge'; jaBadge.className='badge'; }
-  updateCounts();
-  save();
-}
+function updateCounts(){ knCount.textContent=knText.value.length+' chars'; enCount.textContent=enText.value.length+' chars'; jaCount.textContent=jaText.value.length+' chars'; }
 function save(){
-  localStorage.setItem('vs_bilingual', JSON.stringify({en:enText.value, ja:jaText.value, mode:listenMode.value, hist:historyLog.slice(-20)}));
+  localStorage.setItem('vs_bilingual', JSON.stringify({en:enText.value, ja:jaText.value, kn:knText.value, mode:listenMode.value, hist:historyLog.slice(-20)}));
 }
 (function load(){
-  try{ const s=JSON.parse(localStorage.getItem('vs_bilingual')||'{}'); if(s.en) enText.value=s.en; if(s.ja) jaText.value=s.ja; if(s.mode) listenMode.value=s.mode; if(s.hist) historyLog=s.hist; renderHistory(); updateCounts(); }catch(e){}
+  try{ const s=JSON.parse(localStorage.getItem('vs_bilingual')||'{}'); if(s.en) enText.value=s.en; if(s.ja) jaText.value=s.ja; if(s.kn) knText.value=s.kn; if(s.mode) listenMode.value=s.mode; if(s.hist) historyLog=s.hist; renderHistory(); updateCounts(); }catch(e){}
 })();
 
 // Stop before an edit (including paste/IME), with input as a fallback.
@@ -308,7 +324,7 @@ function stopListeningForTyping(){
     statusEl.className='status';
   }
 }
-[enText, jaText, quickInput].forEach(field=>{
+[enText, jaText, knText, quickInput].forEach(field=>{
   field.addEventListener('beforeinput', stopListeningForTyping);
   field.addEventListener('input', stopListeningForTyping);
 });
@@ -331,16 +347,17 @@ function queueTypedTranslation(field, src){
   statusEl.textContent='Editing — translation starts when you pause';
   typingTimer=setTimeout(()=>doTranslate(text,src,src==='en'?'ja':'en','auto'),650);
 }
-[enText, jaText, quickInput].forEach(field=>{
+[enText, jaText, knText, quickInput].forEach(field=>{
   field.addEventListener('beforeinput', invalidateTranslation);
   field.addEventListener('compositionstart',()=>{ composing=true; invalidateTranslation(); });
   field.addEventListener('compositionend',()=>{
     composing=false;
-    if(field!==quickInput) queueTypedTranslation(field,field===enText?'en':'ja');
+    if(field!==quickInput) queueTypedTranslation(field,field===enText?'en':field===jaText?'ja':'kn');
   });
 });
 enText.addEventListener('input',()=>queueTypedTranslation(enText,'en'));
 jaText.addEventListener('input',()=>queueTypedTranslation(jaText,'ja'));
+knText.addEventListener('input',()=>queueTypedTranslation(knText,'kn'));
 quickInput.addEventListener('input',invalidateTranslation);
 autoTranslate.addEventListener('change',invalidateTranslation);
 quickInput.addEventListener('keydown',e=>{
@@ -349,7 +366,7 @@ quickInput.addEventListener('keydown',e=>{
   e.stopPropagation();
   const v=e.target.value.trim(); if(!v) return;
   invalidateTranslation();
-  handleFinalTranscript(v,isJapanese(v)?'ja':'en');
+  handleFinalTranscript(v,detectLanguage(v));
   e.target.value='';
 });
 
@@ -358,55 +375,65 @@ async function doTranslate(text, src, tgt, trigger){
   if(!text) return;
   const revision=++translationRevision;
   const current=()=>revision===translationRevision;
-  statusEl.textContent='Translating…'; statusEl.className='status';
-  try{
-    let out;
+  statusEl.textContent='Translating into the other two languages…'; statusEl.className='status';
+  async function translate(target){
     try{
-      const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${tgt}`);
+      const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${target}`);
       if(!current()) return;
-      if(!r.ok) throw new Error('Translation service unavailable');
+      if(!r.ok) throw new Error('Service unavailable');
       const j=await r.json();
-      if(j.responseStatus && Number(j.responseStatus)!==200) throw new Error('Translation rejected');
-      out=j?.responseData?.translatedText;
-      if(!out) throw new Error('Empty translation');
+      if(j.responseStatus && Number(j.responseStatus)!==200) throw new Error('Rejected');
+      if(!j?.responseData?.translatedText) throw new Error('Empty translation');
+      return j.responseData.translatedText;
     }catch(error){
       if(!current()) return;
-      const r=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${tgt}&dt=t&q=${encodeURIComponent(text)}`);
-      if(!current()) return;
-      if(!r.ok) throw new Error('Translation service unavailable');
+      const r=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${target}&dt=t&q=${encodeURIComponent(text)}`);
+      if(!r.ok) throw new Error('Service unavailable');
       const j=await r.json();
-      out=j?.[0]?.map(segment=>segment[0]).join('');
+      const out=j?.[0]?.map(segment=>segment[0]).join('');
       if(!out) throw new Error('Empty translation');
+      return out;
     }
-    if(!current()) return;
-    if(trigger==='auto'){
-      // Never assign to the source textarea: preserve cursor, selection and undo.
-      const target=src==='en'?jaText:enText;
-      target.value=out;
-      const sourceBadge=src==='en'?enBadge:jaBadge;
-      const targetBadge=src==='en'?jaBadge:enBadge;
-      sourceBadge.textContent='EDITED'; sourceBadge.className='badge heard';
-      targetBadge.textContent='TRANSLATED'; targetBadge.className='badge translated';
-      updateCounts(); save();
-    }else if(src==='ja') setBilingual(out,text,'ja');
-    else setBilingual(text,out,'en');
-    pushHistory(text,out,src);
-    statusEl.textContent='Translation complete • Draft saved';
-  }catch(error){
-    if(current()) statusEl.textContent='Translation unavailable — your draft is safe. Edit again to retry.';
   }
+  const targets=Object.keys(editors).filter(code=>code!==src);
+  const results=await Promise.allSettled(targets.map(translate));
+  if(!current()) return;
+  if(trigger!=='auto') editors[src].value=text;
+  badges[src].textContent=trigger==='auto'?'EDITED':'SOURCE'; badges[src].className='badge heard';
+  const values={[src]:text};
+  results.forEach((result,i)=>{
+    const target=targets[i];
+    if(result.status==='fulfilled' && result.value){
+      editors[target].value=result.value; values[target]=result.value;
+      badges[target].textContent='TRANSLATED'; badges[target].className='badge translated';
+    }else{
+      badges[target].textContent='RETRY NEEDED'; badges[target].className='badge';
+    }
+  });
+  updateCounts(); save();
+  if(Object.keys(values).length>1) pushHistory(values,src);
+  statusEl.textContent=Object.keys(values).length===3?'Translation complete • Draft saved':'Some translations unavailable — edit again to retry. Your draft is safe.';
 }
 
-function pushHistory(original, translated, src){
-  const item={time:new Date().toLocaleTimeString(), en: src==='en'?original:translated, ja: src==='ja'?original:translated, src};
-  historyLog.push(item);
+function pushHistory(values, src){
+  historyLog.push({time:new Date().toLocaleTimeString(),...values,src});
   if(historyLog.length>50) historyLog.shift();
   save(); renderHistory();
 }
 function renderHistory(){
   const el=document.getElementById('historyList');
-  if(!historyLog.length){ el.innerHTML='<div style="padding:8px">No history yet — your bilingual conversations will appear here.</div>'; return; }
-  el.innerHTML=historyLog.slice().reverse().map(h=>`<div class="history-item"><div><span>🇺🇸 English ${h.src==='en'?'(heard)':'(translated)'} • ${h.time}</span><div style="margin-top:4px;font-weight:600;color:#0f172a">${h.en||'-'}</div></div><div><span>🇯🇵 Japanese ${h.src==='ja'?'(heard)':'(translated)'} </span><div style="margin-top:4px;font-weight:600;color:#0f172a">${h.ja||'-'}</div></div></div>`).join('');
+  el.replaceChildren();
+  if(!historyLog.length){ el.textContent='No history yet — translations will appear here.'; return; }
+  historyLog.slice().reverse().forEach(item=>{
+    const row=document.createElement('div'); row.className='history-item';
+    Object.keys(editors).forEach(code=>{
+      const cell=document.createElement('div');
+      const label=document.createElement('span'); label.textContent=languages[code].name+' • '+(item.src===code?'source':'translated')+' • '+item.time;
+      const text=document.createElement('div'); text.textContent=item[code]||'—';
+      cell.append(label,text); row.append(cell);
+    });
+    el.append(row);
+  });
 }
 
 // Speech
@@ -417,7 +444,7 @@ if(!SR){
 } else {
   recognition=new SR();
   recognition.continuous=true; recognition.interimResults=true; recognition.lang=listenMode.value==='auto'?'ja-JP':listenMode.value;
-  recognition.onstart=()=>{ isListening=true; micBtn.classList.add('listening'); micBtn.querySelector('.mic-icon').textContent='⏹️'; micBtn.querySelector('.mic-label').textContent='Stop'; statusEl.textContent='🎧 Listening... speak English or Japanese'; statusEl.className='status listening'; visualizer.classList.add('active'); if(navigator.vibrate) navigator.vibrate(40); };
+  recognition.onstart=()=>{ isListening=true; micBtn.classList.add('listening'); micBtn.querySelector('.mic-icon').textContent='⏹️'; micBtn.querySelector('.mic-label').textContent='Stop'; statusEl.textContent='🎧 Listening... speak English, Japanese or Kannada'; statusEl.className='status listening'; visualizer.classList.add('active'); if(navigator.vibrate) navigator.vibrate(40); };
   recognition.onend=()=>{
     if(isListening && continuousMode.checked){ try{ recognition.start(); }catch(e){} }
     else { isListening=false; micBtn.classList.remove('listening'); micBtn.querySelector('.mic-icon').textContent='🎤'; micBtn.querySelector('.mic-label').textContent='Tap to Listen'; statusEl.textContent='Ready — tap to start'; statusEl.className='status'; visualizer.classList.remove('active'); }
@@ -435,34 +462,21 @@ if(!SR){
     for(let i=e.resultIndex;i<e.results.length;i++){
       const t=e.results[i][0].transcript;
       if(e.results[i].isFinal){
-        const lang=isJapanese(t)?'ja':'en';
+        const lang=listenMode.value==='auto'?detectLanguage(t):listenMode.value.split('-')[0];
         handleFinalTranscript(t.trim(), lang);
       } else interim+=t;
     }
     if(interimResultsEl.checked && interim){
-      // show interim in both? decide by detection
-      const lang=isJapanese(interim)?'ja':'en';
-      if(lang==='ja'){ jaText.value=interim; enBadge.textContent='...'; }
-      else { enText.value=interim; jaBadge.textContent='...'; }
+      // Use the selected speech language, or detect the returned transcript script.
+      const lang=listenMode.value==='auto'?detectLanguage(interim):listenMode.value.split('-')[0];
+      editors[lang].value=interim;
     }
   };
 }
 
 async function handleFinalTranscript(text, detectedLang){
-  // text is final transcript chunk, detectedLang guessed
-  // Now translate to opposite
-  if(detectedLang==='ja'){
-    // Japanese heard → set JA as original, translate to EN
-    // We may have partial, append
-    const currentJa = jaText.value && !jaText.value.endsWith(interimResultsEl.checked? '': '') ? jaText.value + ' ' : jaText.value;
-    // Simpler: directly translate this chunk and set bilingual
-    if(autoTranslate.checked) await doTranslate(text,'ja','en','speech');
-    else { jaText.value=text; updateCounts(); save(); }
-  } else {
-    const currentEn = enText.value;
-    if(autoTranslate.checked) await doTranslate(text,'en','ja','speech');
-    else { enText.value=text; updateCounts(); save(); }
-  }
+  if(autoTranslate.checked) await doTranslate(text,detectedLang,null,'speech');
+  else { editors[detectedLang].value=text; updateCounts(); save(); }
 }
 
 async function ensureMic(){
@@ -570,18 +584,28 @@ function stopSystem(){
 }
 document.getElementById('stopSysBtn').addEventListener('click', stopSystem);
 
+document.getElementById('copyKnBtn').addEventListener('click',async()=>{
+  if(knText.value) { await navigator.clipboard.writeText(knText.value); showToast('Kannada copied'); }
+});
+document.getElementById('speakKnBtn').addEventListener('click',()=>{
+  if(!knText.value) return;
+  if(!('speechSynthesis' in window)) return showToast('Read-aloud unavailable in this browser');
+  if(!speechSynthesis.getVoices().some(voice=>voice.lang.startsWith('kn'))) return showToast('Install a Kannada speech voice on your device to listen');
+  const speech=new SpeechSynthesisUtterance(knText.value); speech.lang='kn-IN'; speechSynthesis.cancel(); speechSynthesis.speak(speech);
+});
+
 // Utilities
 document.getElementById('copyEnBtn').addEventListener('click', async()=>{ if(!enText.value) return showToast('Nothing'); await navigator.clipboard.writeText(enText.value); showToast('🇺🇸 English copied');});
 document.getElementById('copyJaBtn').addEventListener('click', async()=>{ if(!jaText.value) return showToast('Nothing'); await navigator.clipboard.writeText(jaText.value); showToast('🇯🇵 Japanese copied');});
-document.getElementById('copyBothBtn').addEventListener('click', async()=>{ const t=`🇺🇸 English:\n${enText.value}\n\n🇯🇵 Japanese:\n${jaText.value}`; await navigator.clipboard.writeText(t); showToast('Both copied');});
-document.getElementById('clearBtn').addEventListener('click', ()=>{ invalidateTranslation(); enText.value=''; jaText.value=''; enBadge.textContent='—'; jaBadge.textContent='—'; updateCounts(); save(); showToast('Cleared');});
-document.getElementById('shareBtn').addEventListener('click', async()=>{ const t=`🇺🇸 ${enText.value}\n\n🇯🇵 ${jaText.value}`; if(navigator.share) try{await navigator.share({title:'VoiceScribe',text:t});}catch(e){} else {await navigator.clipboard.writeText(t); showToast('Copied for sharing');}});
-document.getElementById('downloadBtn').addEventListener('click', ()=>{ const c=`VoiceScribe Bilingual - ${new Date().toLocaleString()}\n\nENGLISH:\n${enText.value}\n\nJAPANESE:\n${jaText.value}\n\nHistory:\n${historyLog.map(h=>h.time+' | EN:'+h.en+' | JA:'+h.ja).join('\n')}`; const b=new Blob([c],{type:'text/plain'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=`bilingual-${Date.now()}.txt`; a.click(); URL.revokeObjectURL(u); showToast('Saved');});
+document.getElementById('copyBothBtn').addEventListener('click', async()=>{ const t=allText(); await navigator.clipboard.writeText(t); showToast('All three copied');});
+document.getElementById('clearBtn').addEventListener('click', ()=>{ invalidateTranslation(); enText.value=''; jaText.value=''; knText.value=''; knBadge.textContent='—'; enBadge.textContent='—'; jaBadge.textContent='—'; updateCounts(); save(); showToast('Cleared');});
+document.getElementById('shareBtn').addEventListener('click', async()=>{ const t=allText(); if(navigator.share) try{await navigator.share({title:'VoiceScribe',text:t});}catch(e){} else {await navigator.clipboard.writeText(t); showToast('Copied for sharing');}});
+document.getElementById('downloadBtn').addEventListener('click', ()=>{ const c=`VoiceScribe Bilingual - ${new Date().toLocaleString()}\n\nENGLISH:\n${enText.value}\n\nJAPANESE:\n${jaText.value}\n\nKANNADA:\n${knText.value}\n\nHistory:\n${historyLog.map(h=>h.time+' | EN:'+h.en+' | JA:'+(h.ja||'')+' | KN:'+(h.kn||'')).join('\n')}`; const b=new Blob([c],{type:'text/plain'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=`bilingual-${Date.now()}.txt`; a.click(); URL.revokeObjectURL(u); showToast('Saved');});
 document.getElementById('speakEnBtn').addEventListener('click',()=>{ if(!enText.value) return; const u=new SpeechSynthesisUtterance(enText.value); u.lang='en-US'; speechSynthesis.cancel(); speechSynthesis.speak(u);});
 document.getElementById('speakJaBtn').addEventListener('click',()=>{ if(!jaText.value) return; const u=new SpeechSynthesisUtterance(jaText.value); u.lang='ja-JP'; speechSynthesis.cancel(); speechSynthesis.speak(u);});
 document.getElementById('clearHistoryBtn').addEventListener('click',()=>{ historyLog=[]; save(); renderHistory(); showToast('History cleared');});
 document.getElementById('exportHistoryBtn').addEventListener('click',()=>{
-  const csv='time,english,japanese\n'+historyLog.map(h=>`"${h.time}","${(h.en||'').replace(/"/g,'""')}","${(h.ja||'').replace(/"/g,'""')}"`).join('\n');
+  const csv='time,english,japanese,kannada\n'+historyLog.map(h=>`"${h.time}","${(h.en||'').replace(/"/g,'""')}","${(h.ja||'').replace(/"/g,'""')}","${(h.kn||'').replace(/"/g,'""')}"`).join('\n');
   const b=new Blob([csv],{type:'text/csv'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='history.csv'; a.click(); URL.revokeObjectURL(u);
 });
 </script>

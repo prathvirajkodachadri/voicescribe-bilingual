@@ -1,6 +1,6 @@
-# VoiceScribe Bilingual — EN ⇄ JA (GitHub Pages)
+# VoiceScribe Bilingual — EN ⇄ JA ⇄ KN (GitHub Pages)
 
-**Speak in English *or* Japanese → See BOTH languages instantly.  
+**Type or speak English, Japanese or Kannada → See all three languages.
 Mic also listens to computer sound (Meet/Zoom/YouTube) when you enable System Audio capture.**
 
 This is a **ready-to-deploy standalone website** for GitHub Pages. Open its HTTPS URL directly in your browser; no Google Sites embed is needed.
@@ -8,8 +8,8 @@ This is a **ready-to-deploy standalone website** for GitHub Pages. Open its HTTP
 ---
 
 ### ✨ Features for Japanese Collaboration
-- 🎤 **One Mic Button listens for BOTH English & Japanese** — auto-detects which you spoke
-- 🇺🇸🇯🇵 **Dual Output:** Left = English, Right = Japanese. Always both, no need to pick source/target
+- 🎤 **Three speech languages** — select English, Japanese or Kannada before listening (browser support varies)
+- 🇺🇸🇯🇵 **Three editable panels:** English, Japanese and Kannada. Edit any one to translate into the other two
 - 🖥️ **Capture Computer Sound:** Click "Capture System Audio" → Share the Meet/Zoom/YouTube tab → Mic hears your colleague's voice too
 - 🔄 Auto-translate, continuous listening, live preview
 - 📋 Copy / 🔊 Listen / 📤 Share / 🕘 History
@@ -44,7 +44,7 @@ Browsers block system audio for privacy, so we give you 2 working options:
 2. Chrome popup: Select the **Tab/Window** where your colleague is speaking (e.g., Google Meet)
 3. **✅ CHECK "Share system audio"** at bottom-left (very important)
 4. Click Share → Now the site listens to *both* your mic AND the computer sound
-5. Speak in English or Japanese → see both translations
+5. Select your speech language, then speak → see all three languages
 
 **Option B: Enable Stereo Mix (Windows) / BlackHole (Mac) — permanent**
 - **Windows:** Control Panel → Sound → Recording → Right-click → Show Disabled Devices → Enable **Stereo Mix** → Set as Default
@@ -60,11 +60,13 @@ Browsers block system audio for privacy, so we give you 2 working options:
 - `manifest.json` + icons — Makes it installable as phone app
 - `README.md` — This guide
 
-### 🔧 How Bilingual Detection Works
-We auto-detect language: If text contains Hiragana/Katakana/Kanji (`[\u3040-\u30FF\u4E00-\u9FFF]`) → Japanese else English. Then we translate to the *other* language automatically via MyMemory API (free). You can also force direction.
+### 🔧 Language detection and editing
 
-### 🌐 For Kannada?
-Your original request included Kannada. This bilingual site defaults to EN↔JA for your work, but you can change the `targetLangs` array in `index.html` to add `kn` anytime.
+Type in any language panel to translate into the other two after a short pause. Source text, cursor and spacing are preserved. Quick input detects Kannada script (`U+0C80–U+0CFF`), Japanese kana/kanji, or defaults to English. Romanized Kannada is not automatically detected.
+
+Choose **English**, **Japanese**, or **Kannada** in Listening Mode before speaking. Auto mode detects returned transcript script; it does not provide automatic spoken-language detection. Speech recognition support depends on your browser and speech provider. Kannada read-aloud requires an installed Kannada voice.
+
+All three languages are included in local drafts, history, Copy All, sharing, TXT and CSV exports. Older English/Japanese drafts remain compatible.
 
 ---
 
